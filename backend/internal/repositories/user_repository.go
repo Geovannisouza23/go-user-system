@@ -1,8 +1,11 @@
 package repositories
 
 import (
+	"errors"
+
 	"github.com/Geovannisouza23/go-user-api/internal/database"
 	"github.com/Geovannisouza23/go-user-api/internal/models"
+	"gorm.io/gorm"
 )
 
 type UserRepository struct{}
@@ -20,16 +23,19 @@ func (r *UserRepository) FindByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
-func (r *UserRepository) FindAll() ([]models.User, error) {
+func (r *UserRepository) GetAll() ([]models.User, error) {
 	var users []models.User
 	err := database.DB.Find(&users).Error
 	return users, err
 }
 
-func (r *UserRepository) FindByID(id uint) (*models.User, error) {
+func (r *UserRepository) GetByID(id uint) (*models.User, error) {
 	var user models.User
 	err := database.DB.First(&user, id).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
+		}
 		return nil, err
 	}
 	return &user, nil

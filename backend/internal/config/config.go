@@ -18,14 +18,18 @@ type Config struct {
 }
 
 func Load() *Config {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("No .env file found, using system env")
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using system environment variables")
+	}
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatal("JWT_SECRET is required")
 	}
 
 	return &Config{
 		AppPort:   getEnv("APP_PORT", "8080"),
-		JWTSecret: getEnv("JWT_SECRET", "secret"),
+		JWTSecret: jwtSecret,
 		DBHost:    getEnv("DB_HOST", "localhost"),
 		DBPort:    getEnv("DB_PORT", "5432"),
 		DBUser:    getEnv("DB_USER", "postgres"),
@@ -35,9 +39,8 @@ func Load() *Config {
 }
 
 func getEnv(key, defaultValue string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
+	if value := os.Getenv(key); value != "" {
+		return value
 	}
-	return value
+	return defaultValue
 }

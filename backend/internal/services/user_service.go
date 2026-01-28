@@ -5,6 +5,7 @@ import (
 
 	"github.com/Geovannisouza23/go-user-api/internal/models"
 	"github.com/Geovannisouza23/go-user-api/internal/repositories"
+	"gorm.io/gorm"
 )
 
 type UserService struct {
@@ -12,22 +13,29 @@ type UserService struct {
 }
 
 func (s *UserService) GetAll() ([]models.User, error) {
-	return s.UserRepo.FindAll()
+	return s.UserRepo.GetAll()
 }
 
 func (s *UserService) GetByID(id uint) (*models.User, error) {
-	return s.UserRepo.FindByID(id)
+	return s.UserRepo.GetByID(id)
 }
 
 func (s *UserService) Update(id uint, name string) (*models.User, error) {
-	user, err := s.UserRepo.FindByID(id)
+	user, err := s.UserRepo.GetByID(id)
 	if err != nil {
-		return nil, errors.New("user not found")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
+		return nil, err
 	}
 
 	user.Name = name
-	err = s.UserRepo.Update(user)
-	return user, err
+
+	if err := s.UserRepo.Update(user); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (s *UserService) Delete(id uint) error {

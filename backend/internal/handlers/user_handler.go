@@ -9,11 +9,29 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type UserResponse struct {
+	ID    uint   `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
 func Me(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 
-	c.JSON(http.StatusOK, gin.H{
-		"user_id": userID,
+	service := services.UserService{
+		UserRepo: &repositories.UserRepository{},
+	}
+
+	user, err := service.GetByID(userID.(uint))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, UserResponse{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
 	})
 }
 
@@ -28,7 +46,16 @@ func ListUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, users)
+	var response []UserResponse
+	for _, user := range users {
+		response = append(response, UserResponse{
+			ID:    user.ID,
+			Name:  user.Name,
+			Email: user.Email,
+		})
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func GetUser(c *gin.Context) {
@@ -44,7 +71,11 @@ func GetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, UserResponse{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+	})
 }
 
 type UpdateUserRequest struct {
@@ -70,7 +101,11 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, UserResponse{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+	})
 }
 
 func DeleteUser(c *gin.Context) {
@@ -80,8 +115,7 @@ func DeleteUser(c *gin.Context) {
 		UserRepo: &repositories.UserRepository{},
 	}
 
-	err := service.Delete(uint(id))
-	if err != nil {
+	if err := service.Delete(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

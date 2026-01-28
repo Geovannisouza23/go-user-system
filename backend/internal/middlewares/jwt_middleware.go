@@ -28,13 +28,19 @@ func JWTAuth() gin.HandlerFunc {
 			return
 		}
 
-		tokenString := parts[1]
 		secret := os.Getenv("JWT_SECRET")
+		if secret == "" {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"error": "jwt secret not configured",
+			})
+			return
+		}
+
+		tokenString := parts[1]
 
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return []byte(secret), nil
 		})
-
 		if err != nil || !token.Valid {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "invalid or expired token",
@@ -50,9 +56,15 @@ func JWTAuth() gin.HandlerFunc {
 			return
 		}
 
-		userID := claims["sub"]
+		sub, ok := claims["sub"].(float64)
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": "invalid subject claim",
+			})
+			return
+		}
 
-		c.Set("user_id", userID)
+		c.Set("user_id", uint(sub))
 		c.Next()
 	}
 }
