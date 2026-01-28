@@ -24,8 +24,6 @@ namespace GoUserWeb.Controllers
 
             if (profile == null)
                 return RedirectToAction("Login", "Auth");
-        
-         Console.WriteLine($"DEBUG API -> Id={profile.Id}, Name={profile.Name}, Email={profile.Email}");
 
             // 🔴 ESTE MAPEAMENTO É O QUE FALTAVA
             var viewModel = new UserProfileViewModel

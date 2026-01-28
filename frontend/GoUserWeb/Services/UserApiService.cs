@@ -12,7 +12,7 @@ namespace GoUserWeb.Services
         {
             _httpClient = new HttpClient
             {
-                BaseAddress = new Uri("http://localhost:8080")
+                BaseAddress = new Uri("http://api:8080")
             };
         }
 
@@ -27,7 +27,6 @@ namespace GoUserWeb.Services
         return null;
 
     var json = await response.Content.ReadAsStringAsync();
-Console.WriteLine("JSON /me => " + json);
 
 return JsonSerializer.Deserialize<UserProfile>(
     json,
