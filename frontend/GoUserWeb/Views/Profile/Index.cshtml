@@ -1,0 +1,31 @@
+@using GoUserWeb.Models
+@model UserProfileViewModel
+@{
+    ViewData["Title"] = "Meu Perfil";
+}
+
+<h2>Meu Perfil</h2>
+
+<hr />
+
+<div style="max-width: 400px;">
+    <p>
+        <strong>ID:</strong><br />
+        @Model.Id
+    </p>
+
+    <p>
+        <strong>Nome:</strong><br />
+        @Model.Name
+    </p>
+
+    <p>
+        <strong>Email:</strong><br />
+        @Model.Email
+    </p>
+</div>
+
+<hr />
+
+<a href="/Auth/Logout">Sair</a>
+
